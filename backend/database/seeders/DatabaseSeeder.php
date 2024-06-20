@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Client;
+use App\Models\Event;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -29,5 +30,17 @@ class DatabaseSeeder extends Seeder
             'phone' => '1234567890',
             'address' => 'Quillacollo'
         ]);
+        Event::factory(10)->create();
+        // Event::factory()->create([
+        //     'reserve_date' => '',
+        //     'type',
+        //     'event_day',
+        //     'start',
+        //     'finish',
+        //     'guests',
+        //     'total_cost',
+        //     'status',
+        //     'client_id'
+        //     ]);
     }
 }
