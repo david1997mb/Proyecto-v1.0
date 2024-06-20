@@ -32,7 +32,7 @@ class UserController extends Controller
     {
         $user = User::find($id);
         if (!$user) {
-            return Response(['error' => 'Ususario no Encontrado'],Response::HTTP_NOT_FOUND);
+            return Response(['error' => 'Usuario no Encontrado'],Response::HTTP_NOT_FOUND);
             }
         return Response($user,Response::HTTP_OK);
     }
@@ -41,7 +41,7 @@ class UserController extends Controller
     {
         $user = User::find($id);
         if (!$user) {
-            return Response(['error' => 'Ususario no Encontrado'],Response::HTTP_NOT_FOUND);
+            return Response(['error' => 'Usuario no Encontrado'],Response::HTTP_NOT_FOUND);
             }
         $request->validate([
             'name' => 'required|string',
@@ -56,10 +56,10 @@ class UserController extends Controller
     {
         $user = User::find($id);
         if (!$user) {
-            return Response(['error' => 'Ususario no Encontrado'],Response::HTTP_NOT_FOUND);
+            return Response(['error' => 'Usuario no Encontrado'],Response::HTTP_NOT_FOUND);
             }
         $user->delete();
-        return Response(['message' => 'Ususario Eliminado'],Response::HTTP_OK);
+        return Response(['message' => 'Usuario Eliminado'],Response::HTTP_OK);
     }
 
     public function login(Request $request){
