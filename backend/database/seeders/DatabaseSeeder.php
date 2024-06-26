@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Client;
 use App\Models\Event;
+use App\Models\Pay;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -31,6 +32,7 @@ class DatabaseSeeder extends Seeder
             'address' => 'Quillacollo'
         ]);
         Event::factory(10)->create();
+        Pay::factory(10)->create();
         // Event::factory()->create([
         //     'reserve_date' => '',
         //     'type',
