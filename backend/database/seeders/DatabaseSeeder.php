@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Area;
 use App\Models\Client;
 use App\Models\Event;
 use App\Models\Pay;
@@ -33,6 +34,7 @@ class DatabaseSeeder extends Seeder
         ]);
         Event::factory(10)->create();
         Pay::factory(10)->create();
+        Area::factory(5)->create();
         // Event::factory()->create([
         //     'reserve_date' => '',
         //     'type',

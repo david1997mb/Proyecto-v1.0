@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Event extends Model
 {
@@ -26,5 +27,8 @@ class Event extends Model
     }
     public function pays(): HasMany{
         return $this->hasMany(Pay::class);
+    }
+    public function areas() {
+        return $this->belongsToMany(Area::class);
     }
 }
