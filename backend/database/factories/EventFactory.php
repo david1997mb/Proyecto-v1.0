@@ -16,18 +16,15 @@ class EventFactory extends Factory
      */
     public function definition(): array
     {
-        $opciones1 = ['Matrimonio','Cumpleaños','QuinceAños','Reunion Familiar','Reunion Escolar','Bautizo','Graduacion'];
-        $opciones2 = ['Cancelado','Completado','Falta Pagar'];
         return [
-            'reserve_date' => $this->faker->dateTimeThisDecade,
-            'type' => $this->faker->randomElement($opciones1),
-            'event_day' => $this->faker->dateTimeThisYear(),
-            'start' => $this->faker->time(),
-            'finish' => $this->faker->time(),
-            'guests' => $this->faker->numberBetween(50,250),
-            'total_cost' => $this->faker->numberBetween(1000,5000),
-            'status'=> $this->faker->randomElement($opciones2),
-            'client_id'=> $this->faker->numberBetween(1,10)
+            'user_id' => $this->faker->numberBetween(1, 6),
+            'client_id' => $this->faker->numberBetween(1, 10),
+            'reserve_at' => $this->faker->dateTimeThisYear(),
+            'type' => $this->faker->randomElement(['Matrimonio','Cumpleaños','Reuniones','Bautizo']),
+            'event_date' => $this->faker->date(),
+            'guests' => $this->faker->numberBetween(1, 100),
+            'cost' => $this->faker->randomFloat(2, 100, 1000),
+            'status' => $this->faker->randomElement(['Completado','Cancelado','Pagando']),
         ];
     }
 }

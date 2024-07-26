@@ -2,84 +2,78 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cookie;
-use Symfony\Component\HttpFoundation\Response;
+use \Illuminate\Support\Facades\Validator;
+use App\Models\User;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $users = User::all();
-        return Response($users,Response::HTTP_OK);
+        $users = User::select('users.*')
+        ->paginate(10);
+        return response()->json($users);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|confirmed',
-            'password_confirmation' => 'required|string',
-            ]);
-        $user = User::create($request->all());
-        return Response($user,Response::HTTP_CREATED);
-    }
-
-    public function show(string $id)
-    {
-        $user = User::find($id);
-        if (!$user) {
-            return Response(['error' => 'Usuario no Encontrado'],Response::HTTP_NOT_FOUND);
-            }
-        return Response($user,Response::HTTP_OK);
-    }
-
-    public function update(Request $request, string $id)
-    {
-        $user = User::find($id);
-        if (!$user) {
-            return Response(['error' => 'Usuario no Encontrado'],Response::HTTP_NOT_FOUND);
-            }
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|confirmed',
-            ]);
-        $user->update($request->all());
-        return Response($user,Response::HTTP_OK);
-    }
-
-    public function destroy(string $id)
-    {
-        $user = User::find($id);
-        if (!$user) {
-            return Response(['error' => 'Usuario no Encontrado'],Response::HTTP_NOT_FOUND);
-            }
-        $user->delete();
-        return Response(['message' => 'Usuario Eliminado'],Response::HTTP_OK);
-    }
-
-    public function login(Request $request){
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
-        $credentials = $request->only(['email', 'password']);
-        if (!Auth::attempt($credentials)) {
-            return Response(['error' => 'Credenciales Invalidas'], Response::HTTP_UNAUTHORIZED);
+        $rules = [
+            'name' => 'required|string|min:1|max:100',
+            'email' => 'required|email|max:100|unique:users',
+            'password' => 'required|string|min:6',
+        ];
+        $validator = Validator::make($request->input(),$rules);
+        if ($validator->fails()) {
+            return response()->json([
+                'status'=>false,
+                'errors'=> $validator->errors()->all()
+            ],400);
         }
-        $user = Auth::user();
-        $token = $user->createToken('auth_token')->plainTextToken;
-        $cookie = cookie('auth_token', $token, 60*24); 
-        return Response(['Token' => $token], Response::HTTP_OK)
-            ->withCookie($cookie); 
+        $user = new User($request->input());
+        $user->save();
+        return response()->json([
+            'status'=>true,
+            'message'=> 'Usuario Creado Correctamente'
+        ],200);
     }
 
-    public function logout(){
-        $cookie = Cookie::forget('auth_token');
-        return Response(['message' => 'Sesion Cerrada'],Response::HTTP_OK);
+    public function show(User $user)
+    {
+        return response()->json(['status'=>true,'data'=>$user]);
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $rules = [
+            'name' => 'required|string|min:1|max:100',
+            'email' => 'required|email|max:100|unique:users',
+            'password' => 'required|string|min:6',
+        ];
+        $validator = Validator::make($request->input(),$rules);
+        if ($validator->fails()) {
+            return response()->json([
+                'status'=>false,
+                'errors'=> $validator->errors()->all()
+            ],400);
+        }
+        $user->update($request->input());
+        return response()->json([
+            'status'=>true,
+            'message'=> 'Usuario Actualizado Correctamente'
+        ],200);
+    }
+
+    public function destroy(User $user)
+    {
+        $user->delete();
+        return response()->json([
+            'status'=>true,
+            'message'=> 'Usuario Eliminado Correctamente'
+        ],200);
+    }
+    public function all() {
+        $users = User::select('users.*')
+        ->get();
+        return response()->json($users);
     }
 }

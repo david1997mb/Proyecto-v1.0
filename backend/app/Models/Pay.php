@@ -4,20 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Pay extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'pay_date',
+        'event_id',
         'amount',
-        'pay_type',
-        'pay_status',
-        'deuda',
-        'event_id'
-        ];
-    public function event(): BelongsTo{
+        'pay_date',
+        'method'
+    ];
+    public function event()
+    {
         return $this->belongsTo(Event::class);
     }
 }

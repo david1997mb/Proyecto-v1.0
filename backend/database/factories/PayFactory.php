@@ -16,16 +16,11 @@ class PayFactory extends Factory
      */
     public function definition(): array
     {
-        $op = ['transferencia','efectivo','depósito'];
-        $op1 = ['Pagando','Completado','Cancelado'];
-    
         return [
-            'pay_date' => $this->faker->dateTimeThisDecade,
-            'amount' => $this->faker->numberBetween(100,1000),
-            'pay_type' => $this->faker->randomElement($op),
-            'pay_status' => $this->faker->randomElement($op1),
-            'deuda' => $this->faker->numberBetween(100,1000),
-            'event_id' => $this->faker->numberBetween(1,10)
+            'event_id' => $this->faker->numberBetween(1, 10),
+            'amount'=> $this->faker->randomFloat(2, 100, 1000),
+            'pay_date' => $this->faker->dateTimeThisYear(),
+            'method' => $this->faker->randomElement(['Efectivo','Transferencia','Deposito','Tarjeta']),
         ];
     }
 }

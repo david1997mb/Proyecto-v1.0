@@ -2,58 +2,126 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Event;
 use App\Models\Pay;
+use App\Models\Event;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use \Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class PayController extends Controller
 {
     public function index()
     {
-        $pays = Pay::with('event')->get();
-        return response($pays,Response::HTTP_OK); 
+        $pays = Pay::select('pays.*', 'events.type as event', 'clients.name as client')
+                    ->join('events', 'events.id', '=', 'pays.event_id')
+                    ->join('clients', 'clients.id', '=', 'events.client_id')
+                    ->paginate(10);
+        return response()->json($pays);
     }
 
     public function store(Request $request)
     {
-        $event1 = Event::with('Client')->findOrFail($request->get('event_id'));
-        $total= $event1->total_cost;
-        $pago = $request->amount;
-        $deuda= $total - $pago;
-        if($deuda < 0)return response(['mesg'=>'No se puede crear el pago'],Response::HTTP_INTERNAL_SERVER_ERROR);
-        $pay = Pay::create([
-            'pay_date'=> $request->pay_date,
-            'amount' => $request->amount,
-            'pay_type'=> $request->pay_type,
-            'pay_status'=> $request->pay_status,
-            'deuda' => $deuda,
-            'event_id' => $request->get('event_id'),
-        ]);
-        if ($deuda == 0) {
-            $event1->update(['status'=>'Completado']);
-            $event1->save();
-            $pay->update(['pay_status'=>'Completado']);
-            $pay->save();
+        $rules = [
+            'event_id' => 'required|exists:events,id',
+            'amount' => 'required',
+            'method' => 'required|in:Efectivo,Transferencia,Deposito,Tarjeta'
+        ];
+
+        $validator = Validator::make($request->input(), $rules);
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()->all()
+            ], 400);
         }
-        return response($pay,Response::HTTP_CREATED);
+
+        try {
+            DB::transaction(function () use ($request) {
+                $event = Event::findOrFail($request->event_id);
+                $pay = Pay::create($request->input());
+
+                $event->saldo -= $request->amount;
+                $event->save();
+
+                if ($event->saldo <= 0) {
+                    $event->status = 'Completado';
+                    $event->save();
+                }
+            });
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Pago Creado Correctamente'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al procesar el pago: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function show(Pay $pay)
     {
-        $pay = Pay::with('event')->findOrFail($pay->id);
-        return response($pay,Response::HTTP_OK);
+        $event = $pay->event;
+        $client = $event->client;
+        return response()->json([
+            'status' => true,
+            'data' => [
+                'pay' => $pay,
+                'event' => $event,
+                'client' => $client
+            ]
+        ], 200);
     }
 
     public function update(Request $request, Pay $pay)
     {
-        $pay->update($request->all());
-        return response($pay,Response::HTTP_OK);
+        $rules = [
+            'event_id' => 'required|exists:events,id',
+            'amount' => 'required',
+            'pay_date' => 'required',
+            'method' => 'required|in:Efectivo,Transferencia,Deposito,Tarjeta'
+        ];
+        $validator = Validator::make($request->input(),$rules);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()->all()
+            ],400);
+        }
+        $pay->update($request->input());
+        return response()->json([
+            'status' => true,
+            'message' => 'Pago Actualizado Correctamente'
+        ],200);
     }
 
     public function destroy(Pay $pay)
     {
         $pay->delete();
-        return response(['msg'=> 'Pago eliminado correctamente'],Response::HTTP_NO_CONTENT);
+        return response()->json([
+            'status' => true,
+            'message' => 'Pago Eliminado Correctamente'
+        ],200);
     }
+
+    public function paysbyevent() {
+        $pays = Pay::select(DB::raw('count(pays.id) as count, events.type'))
+            ->rightJoin('events','events.id','=','pays.event_id')
+            ->groupBy('events.type')
+            ->get();
+        return response()->json($pays);
+    } 
+
+    public function all() {
+        $pays = Pay::select('pays.*', 'events.type as event', 'clients.name as client')
+            ->join('events', 'events.id', '=', 'pays.event_id')
+            ->join('clients', 'clients.id', '=', 'events.client_id')
+            ->get();
+        return response()->json($pays);
+    }
+    
 }
+            

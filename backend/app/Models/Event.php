@@ -4,31 +4,40 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use App\Events\EventCreated;
 
 class Event extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'reserve_date',
+        'user_id',
+        'client_id',
+        'reserve_at',
         'type',
-        'event_day',
-        'start',
-        'finish',
+        'event_date',
         'guests',
-        'total_cost',
+        'cost',
         'status',
-        'client_id'
-        ];
-    public function client(): BelongsTo{
-        return $this->belongsTo(Client::class);
-    }
-    public function pays(): HasMany{
-        return $this->hasMany(Pay::class);
-    }
-    public function areas() {
+        'saldo'
+    ];
+    public function areas()
+    {
         return $this->belongsToMany(Area::class);
     }
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+    public function pays()
+    {
+        return $this->hasMany(Pay::class);
+    }
+    protected $dispatchesEvents = [
+        'created' => EventCreated::class,
+    ];
 }

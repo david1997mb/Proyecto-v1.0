@@ -16,9 +16,29 @@ class AreaFactory extends Factory
      */
     public function definition(): array
     {
+        // Lista de nombres de áreas
+        $areaNames = [
+            'Patio Trasero',
+            'Baños',
+            'Deposito Subterraneo',
+            'Comedores Mezanine',
+            'Comedores Primer Piso',
+            'Cuarto Tocador',
+            'Pista Central',
+            'Cantina',
+            'Kiosko',
+            'Sala Estar',
+            'Escenario Principal',
+            'Mesa Central',
+            'Mesa Dulce',
+        ];
+
+        // Selecciona un nombre aleatorio de la lista
+        $name = $this->faker->unique()->randomElement($areaNames);
+
         return [
-            'name' => $this->faker->name(),
-            'description' => $this->faker->text(),
+            'name' => $name,
         ];
     }
 }
+

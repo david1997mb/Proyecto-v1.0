@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\Pay;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,8 +18,14 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
+    public function boot()
     {
-        //
+        // Escucha el evento created del modelo Pay
+        Pay::created(function ($pay) {
+            // Actualiza el campo saldo del evento correspondiente
+            $event = $pay->event;
+            $event->saldo -= $pay->amount;
+            $event->save();
+        });
     }
 }
